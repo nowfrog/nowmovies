@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><svg id="SvgjsSvg1001" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 200 200">
+  <!-- Generator: Adobe Illustrator 29.8.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 160)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #fff;
+      }
+
+      .st1 {
+        fill: #1f2937;
+      }
+
+      .st2 {
+        stroke: #1f2937;
+        stroke-linecap: round;
+        stroke-width: 3.5px;
+      }
+
+      .st2, .st3, .st4 {
+        fill: none;
+      }
+
+      .st5 {
+        fill: #34d399;
+      }
+
+      .st3 {
+        stroke-width: 2px;
+      }
+
+      .st3, .st4 {
+        stroke: #fff;
+      }
+
+      .st6 {
+        fill: #ffec00;
+      }
+
+      .st4 {
+        stroke-width: 1.5px;
+      }
+    </style>
+  </defs>
+  <rect class="st6" width="200.7" height="200.7"></rect>
+  <circle class="st6" cx="100" cy="101.43" r="95"></circle>
+  <path class="st5" d="M40.57,114.6c0,30.77,17.58,46.15,52.75,46.15s52.75-15.38,52.75-46.15c0-13.19-4.4-21.98-13.19-26.37-4.4-4.4-8.79-6.59-13.19-6.59-4.4-2.64-8.79-3.96-13.19-3.96h-26.37c-4.4,0-8.79,1.32-13.19,3.96-4.4,0-8.79,2.2-13.19,6.59-8.79,4.4-13.19,13.19-13.19,26.37Z"></path>
+  <circle class="st0" cx="76.51" cy="92.24" r="24.64"></circle>
+  <circle class="st0" cx="110.12" cy="92.24" r="24.64"></circle>
+  <circle class="st1" cx="76.51" cy="92.24" r="14.56"></circle>
+  <circle class="st1" cx="110.12" cy="92.24" r="14.56"></circle>
+  <circle class="st0" cx="80.99" cy="87.76" r="6.72"></circle>
+  <circle class="st0" cx="114.6" cy="87.76" r="6.72"></circle>
+  <path class="st2" d="M73.03,126.06c14.23,7.18,28.46,7.18,42.68,0"></path>
+  <g>
+    <rect class="st1" x="121.32" y="50.79" width="50.41" height="39.21" rx="2" ry="2"></rect>
+    <rect class="st0" x="121.32" y="41.83" width="50.41" height="11.2" rx="2" ry="2"></rect>
+    <rect class="st1" x="121.32" y="41.83" width="10.08" height="11.2"></rect>
+    <rect class="st1" x="141.48" y="41.83" width="10.08" height="11.2"></rect>
+    <rect class="st1" x="161.65" y="41.83" width="10.08" height="11.2"></rect>
+    <line class="st3" x1="126.92" y1="62" x2="160.53" y2="62"></line>
+    <line class="st4" x1="126.92" y1="69.84" x2="154.93" y2="69.84"></line>
+    <line class="st4" x1="126.92" y1="77.68" x2="160.53" y2="77.68"></line>
+  </g>
+  <ellipse class="st5" cx="55.04" cy="143.95" rx="13.38" ry="7.59"></ellipse>
+  <ellipse class="st5" cx="132.52" cy="143.95" rx="13.38" ry="7.59"></ellipse>
+</svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
+@media (prefers-color-scheme: dark) { :root { filter: none; } }
+</style></svg>

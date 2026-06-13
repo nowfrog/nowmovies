@@ -1,0 +1,12 @@
+# Configuration (contains API key and password hash)
+admin/config.php
+
+# Personal data
+liste/*.json
+!liste/manifest.example.json
+screenshots/
+
+# System
+.DS_Store
+Thumbs.db
+*.swp

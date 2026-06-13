@@ -1,0 +1,14 @@
+[
+    {
+        "slug": "favourites",
+        "description": "My all-time favourite movies.",
+        "color": "#ff3b30",
+        "protected": true
+    },
+    {
+        "slug": "watchlist",
+        "description": "Movies I want to watch.",
+        "color": "#30d158",
+        "protected": true
+    }
+]

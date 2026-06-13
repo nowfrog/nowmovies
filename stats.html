@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nowfrog Movie Stats</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/nowmovies/favicon-96x96.png" sizes="96x96" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        html{touch-action:pan-x pan-y;scrollbar-width:none}
+        html::-webkit-scrollbar{display:none}
+        body{font-family:'Inter',sans-serif}
+        .sh{width:100%;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--background-light);z-index:10;border-bottom:1px solid var(--card-border-light)}
+        body.dark-mode .sh{background:var(--background-dark);border-color:var(--card-border-dark)}
+        .sh h1{font-size:1.4em;font-weight:700}
+        .sh .ha{display:flex;align-items:center;gap:8px}
+        .sh a{color:var(--link-color-light);text-decoration:none;font-weight:600;font-size:.88em}
+        body.dark-mode .sh a{color:var(--link-color-dark)}
+        .hi{display:flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;background:none;border:none;cursor:pointer;color:var(--text-light);opacity:.5;transition:opacity .2s}
+        .hi svg{width:18px;height:18px}
+        .hi:hover{opacity:.9}
+        body.dark-mode .hi{color:var(--text-dark)}
+        .sn{padding:12px 16px;display:flex;flex-wrap:wrap;justify-content:center;gap:7px;max-width:1100px;margin:0 auto;align-items:center}
+        .nav-dropdown-wrap{position:relative}
+        .nav-dropdown-btn{padding:8px 16px;font-size:.9em;font-weight:600;cursor:pointer;background:var(--button-bg-light);color:var(--button-text-light);border:none;border-radius:8px;font-family:inherit}
+        .nav-dropdown-btn:hover{opacity:.8}
+        .nav-dropdown-btn.has-selected{color:#fff}
+        body.dark-mode .nav-dropdown-btn{background:var(--button-bg-dark);color:var(--button-text-dark)}
+        .nav-dropdown-menu{display:none;position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:6px;background:var(--card-bg-light);border:1px solid var(--card-border-light);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100;min-width:180px;padding:4px;white-space:nowrap}
+        .nav-dropdown-menu.open{display:block}
+        body.dark-mode .nav-dropdown-menu{background:var(--card-bg-dark);border-color:var(--card-border-dark);box-shadow:0 4px 16px rgba(0,0,0,.4)}
+        .nav-dropdown-item{display:block;width:100%;padding:8px 14px;border:none;background:none;text-align:left;font-size:.88em;font-weight:500;cursor:pointer;border-radius:6px;color:var(--text-light);font-family:inherit}
+        .nav-dropdown-item:hover{background:var(--button-bg-light)}
+        body.dark-mode .nav-dropdown-item{color:var(--text-dark)}
+        body.dark-mode .nav-dropdown-item:hover{background:var(--button-bg-dark)}
+        .nav-dropdown-item.active{font-weight:700}
+        .nav-aw{background:linear-gradient(135deg,#ff9500,#ff6482)!important;color:#fff!important;border:none!important;font-weight:700}
+        .sw{width:100%;max-width:1100px;margin:0 auto;padding:0 16px 60px}
+
+        /* Animated blocks */
+        .b{opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s;margin-bottom:28px}
+        .b.v{opacity:1;transform:translateY(0)}
+
+        /* Hero */
+        .hero{text-align:center;padding:50px 20px;border-radius:20px;color:#fff;position:relative;overflow:hidden}
+        .hero::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 70%,rgba(255,255,255,.15),transparent 60%);pointer-events:none}
+        .hero-n{font-size:clamp(3.5em,12vw,6em);font-weight:900;line-height:1;text-shadow:0 4px 20px rgba(0,0,0,.2)}
+        .hero-l{font-size:1.15em;font-weight:600;margin-top:8px;opacity:.9}
+        .hero-s{font-size:.88em;margin-top:14px;opacity:.65;font-style:italic;max-width:480px;margin-left:auto;margin-right:auto}
+
+        /* Insight cards */
+        .ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+        .ic{background:var(--card-bg-light);border:1px solid var(--card-border-light);border-radius:14px;padding:18px;text-align:center;transition:transform .15s}
+        .ic:hover{transform:translateY(-2px)}
+        body.dark-mode .ic{background:var(--card-bg-dark);border-color:var(--card-border-dark)}
+        .ic-v{font-size:1.9em;font-weight:900}
+        .ic-l{font-size:.78em;color:#8e8e93;margin-top:3px}
+        .ic-f{font-size:.72em;color:#aaa;margin-top:4px;font-style:italic}
+        .ic.clk{cursor:pointer}
+        .ic .h{font-size:.6em;color:#bbb;margin-top:2px}
+
+        /* Section title */
+        .st{font-size:1.05em;font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--card-border-light)}
+        body.dark-mode .st{border-color:var(--card-border-dark)}
+
+        /* Charts grid */
+        .cg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:700px){.cg{grid-template-columns:1fr}}
+        .cc{background:var(--card-bg-light);border:1px solid var(--card-border-light);border-radius:14px;padding:14px;position:relative}
+        body.dark-mode .cc{background:var(--card-bg-dark);border-color:var(--card-border-dark)}
+        .cc.w{grid-column:1/-1}
+        .cc h3{font-size:.78em;color:#8e8e93;margin-bottom:8px;font-weight:600}
+        .cc canvas{width:100%!important;height:240px!important}
+        .cc.t canvas{height:270px!important}
+
+        /* Phrase */
+        .ph{text-align:center;font-size:1.05em;font-weight:600;padding:14px 8px;opacity:.8;line-height:1.5}
+
+        /* People grid (actors/directors) */
+        .ppl{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:12px}
+        @media(min-width:700px){.ppl{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}}
+        .pp{text-align:center;opacity:0;transform:scale(.85);transition:opacity .35s,transform .35s}
+        .pp.pop{opacity:1;transform:scale(1)}
+        .pp img{width:70px;height:70px;border-radius:50%;object-fit:cover;box-shadow:0 3px 10px rgba(0,0,0,.2);background:#333;transition:transform .2s}
+        .pp img:hover{transform:scale(1.08)}
+        .pp .pp-n{font-size:.72em;font-weight:700;margin-top:6px;line-height:1.2}
+        .pp .pp-c{font-size:.65em;color:#8e8e93}
+        .pp .pp-r{font-size:.78em;font-weight:800;color:var(--rating-green-bg)}
+
+        /* Poster grid */
+        .pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:10px}
+        @media(min-width:700px){.pg{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}}
+        .po{text-align:center;opacity:0;transform:scale(.85);transition:opacity .35s,transform .35s;cursor:pointer}
+        .po.pop{opacity:1;transform:scale(1)}
+        .po img{width:100%;border-radius:9px;aspect-ratio:2/3;object-fit:cover;box-shadow:0 3px 10px rgba(0,0,0,.18);transition:transform .2s}
+        .po img:hover{transform:scale(1.05)}
+        .po .po-r{font-size:.82em;font-weight:800;color:var(--rating-green-bg);margin-top:4px}
+        .po .po-t{font-size:.68em;font-weight:600;line-height:1.15;margin-top:2px}
+        .po .po-d{font-size:.62em;color:#8e8e93}
+
+
+        /* Screenshot mosaic */
+        .ss-mosaic{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;border-radius:12px;overflow:hidden}
+        .ss-mosaic img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;transition:transform .2s}
+        .ss-mosaic img:hover{transform:scale(1.05)}
+
+        .loading{text-align:center;padding:80px 20px;color:#8e8e93}
+        .loading .sp{display:inline-block;width:28px;height:28px;border:3px solid #8e8e93;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;margin-bottom:12px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .empty{text-align:center;padding:60px;color:#8e8e93;font-size:1.05em}
+    </style>
+</head>
+<body>
+    <header class="sh"><h1>Movie Stats</h1><div class="ha"><a href="/nowmovies/">← Back</a><button id="dt" class="hi"></button></div></header>
+    <nav class="sn" id="sn"></nav>
+    <div class="sw" id="sc"><p class="empty">Pick a list to explore.</p></div>
+<script>
+document.addEventListener('DOMContentLoaded',async()=>{
+const nav=document.getElementById('sn'),ct=document.getElementById('sc'),dt=document.getElementById('dt');
+let mf=[],cache={},charts=[];
+const sv=localStorage.getItem('theme');
+const sunSvg2='<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const moonSvg2='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>';
+if(sv==='dark'||(!sv&&matchMedia('(prefers-color-scheme:dark)').matches)){document.body.classList.add('dark-mode');dt.innerHTML=sunSvg2;}else{dt.innerHTML=moonSvg2;}
+dt.onclick=()=>{document.body.classList.toggle('dark-mode');const d=document.body.classList.contains('dark-mode');localStorage.setItem('theme',d?'dark':'light');dt.innerHTML=d?sunSvg2:moonSvg2;nav.querySelector('.nav-button.selected')?.click();};
+Chart.defaults.animation.duration=900;Chart.defaults.animation.easing='easeOutQuart';
+const dk=()=>document.body.classList.contains('dark-mode'),tc=()=>dk()?'#fff':'#1c1c1e',gc=()=>dk()?'rgba(255,255,255,.07)':'rgba(0,0,0,.05)';
+const P=['#007aff','#34c759','#ff3b30','#ff9500','#af52de','#5ac8fa','#ffcc00','#ff6482','#30d158','#5856d6','#00c7be','#ff2d55'];
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const r=await fetch('liste/manifest.json',{cache:'no-store'});mf=await r.json();
+function cc(){charts.forEach(c=>c.destroy());charts=[];}
+async function ld(s){if(!cache[s]){const r=await fetch(`liste/${s}.json`,{cache:'no-store'});cache[s]=Object.values(await r.json());}return cache[s];}
+function pr(r){if(!r||r==='-')return null;const v=parseFloat(String(r).replace(',','.'));return isNaN(v)?null:v;}
+function fd(d){const t=new Date(d+'T00:00:00');return`${MN[t.getMonth()]} ${t.getDate()}, ${t.getFullYear()}`;}
+function co(){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{color:tc()},grid:{color:gc()}},x:{ticks:{color:tc()},grid:{display:false}}}}}
+function don(){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc(),font:{size:10}}}},scales:{}}}
+function anim(){const o=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('v');o.unobserve(e.target);}});},{threshold:.05});ct.querySelectorAll('.b').forEach((b,i)=>setTimeout(()=>o.observe(b),i*50));ct.querySelectorAll('.po,.pp').forEach((p,i)=>setTimeout(()=>p.classList.add('pop'),120+i*40));}
+function cnt(el,t){let c=0;const s=Math.max(1,Math.floor(t/50));const i=setInterval(()=>{c=Math.min(c+s,t);el.textContent=c.toLocaleString();if(c>=t)clearInterval(i);},18);}
+function rtF(m){const h=Math.floor(m/60),d=(m/60/24).toFixed(1),mo=(m/60/24/30).toFixed(1),y=(m/60/24/365).toFixed(2);return[{v:`${h.toLocaleString()}h`,l:'hours'},{v:`${d} days`,l:'days'},{v:`${mo} months`,l:'months'},{v:`${y} years`,l:'years'}];}
+function rtCard(mins){const f=rtF(mins);let i=0;const d=document.createElement('div');d.className='ic clk';d.innerHTML=`<div class="ic-v">${f[0].v}</div><div class="ic-l">Runtime (${f[0].l})</div><div class="h">tap to switch</div>`;d.onclick=()=>{i=(i+1)%f.length;d.querySelector('.ic-v').textContent=f[i].v;d.querySelector('.ic-l').textContent=`Runtime (${f[i].l})`;};return d;}
+
+function analyze(movies,slug){
+    const ratings=movies.map(m=>pr(m['your-rating'])).filter(r=>r!==null);
+    const avg=ratings.length?(ratings.reduce((a,b)=>a+b,0)/ratings.length):0;
+    const totalMins=movies.reduce((s,m)=>s+(m.runtime||0),0);
+    const genres={};movies.forEach(m=>(m.genres||[]).forEach(g=>{genres[g.name]=(genres[g.name]||0)+1;}));
+    const topG=Object.entries(genres).sort((a,b)=>b[1]-a[1]);
+    const decades={};movies.forEach(m=>{if(m.release_date){const d=Math.floor(parseInt(m.release_date.substring(0,4))/10)*10;decades[d+'s']=(decades[d+'s']||0)+1;}});
+    const decs=Object.entries(decades).sort((a,b)=>a[0].localeCompare(b[0]));
+    const countries={};movies.forEach(m=>(m.origin_country||[]).forEach(c=>{countries[c]=(countries[c]||0)+1;}));
+    const topC=Object.entries(countries).sort((a,b)=>b[1]-a[1]);
+    const rDist={};ratings.forEach(r=>{const b=Math.floor(r);rDist[b]=(rDist[b]||0)+1;});
+    const rB=Object.entries(rDist).sort((a,b)=>a[0]-b[0]);
+    const topRated=movies.filter(m=>pr(m['your-rating'])!==null).sort((a,b)=>pr(b['your-rating'])-pr(a['your-rating'])).slice(0,12);
+    const worst=movies.filter(m=>pr(m['your-rating'])!==null&&pr(m['your-rating'])<5).sort((a,b)=>pr(a['your-rating'])-pr(b['your-rating'])).slice(0,6);
+    const longest=movies.filter(m=>m.runtime).sort((a,b)=>b.runtime-a.runtime)[0];
+    const shortest=movies.filter(m=>m.runtime&&m.runtime>30).sort((a,b)=>a.runtime-b.runtime)[0];
+    const topDec=decs.length?decs.reduce((a,b)=>b[1]>a[1]?b:a):null;
+    const p10=movies.filter(m=>pr(m['your-rating'])===10);
+
+    // Directors
+    const dirCount={};const dirInfo={};
+    movies.forEach(m=>(m.directors||[]).forEach(d=>{dirCount[d.name]=(dirCount[d.name]||0)+1;if(!dirInfo[d.name])dirInfo[d.name]=d;}));
+    const topDir=Object.entries(dirCount).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([name,count])=>({...dirInfo[name],count}));
+
+    // Actors
+    const actCount={};const actInfo={};
+    movies.forEach(m=>(m.cast||[]).forEach(a=>{actCount[a.name]=(actCount[a.name]||0)+1;if(!actInfo[a.name])actInfo[a.name]=a;}));
+    const topAct=Object.entries(actCount).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([name,count])=>({...actInfo[name],count}));
+
+    // Screenshots
+    const withSs=movies.filter(m=>m.screenshots&&m.screenshots.length>0).sort((a,b)=>(b.screenshots||[]).length-(a.screenshots||[]).length);
+    const allSs=[];withSs.forEach(m=>m.screenshots.forEach(s=>allSs.push(s)));
+
+    return{ratings,avg:avg.toFixed(1),totalMins,topG,decs,topC,rB,topRated,worst,longest,shortest,topDec,p10,topDir,topAct,withSs,allSs};
+}
+
+const isWatchedList=(s)=>s.startsWith('seen_');
+const isThematicList=(s)=>!isWatchedList(s)&&s!=='favourites'&&s!=='watchlist';
+
+function heroTxt(slug,n,D){
+    const d=(D.totalMins/60/24).toFixed(0);
+    if(slug==='favourites')return`${n} masterpieces. The films that defined your taste.`;
+    if(slug==='watchlist')return`${n} films waiting. So many worlds to explore.`;
+    if(slug==='special_agent_dinozzos_watchlist')return`${n} classic films curated by the one and only. DiNozzo would be proud, probie.`;
+    if(slug==='cronenberg')return`${n} entries into the body horror universe. Long live the new flesh.`;
+    if(slug==='italian')return`${n} gems from the homeland. La dolce vita del cinema.`;
+    if(slug==='calcio')return`The beautiful game, captured in ${n} films.`;
+    if(isWatchedList(slug))return`${n} movies watched. That's ${d} days of pure cinema.`;
+    return`A curated collection of ${n} films.`;
+}
+
+const isWatchlist=(s)=>s==='watchlist';
+
+function facts(slug,movies,D){
+    const f=[];
+    const thematic=isThematicList(slug);
+    const wl=isWatchlist(slug);
+
+    if(wl){
+        if(D.topDir[0])f.push(`Most anticipated director: <strong>${D.topDir[0].name}</strong> with ${D.topDir[0].count} films queued.`);
+        if(D.topAct[0])f.push(`<strong>${D.topAct[0].name}</strong> shows up in ${D.topAct[0].count} films on your radar.`);
+        if(D.longest)f.push(`Longest upcoming sit: <strong>${D.longest.original_title}</strong> (${D.longest.runtime} min). Get the popcorn ready.`);
+        if(D.topDec)f.push(`Most represented decade: the <strong>${D.topDec[0]}</strong> with ${D.topDec[1]} films.`);
+        const totalH=Math.floor(D.totalMins/60);
+        f.push(`<strong>${totalH} hours</strong> of cinema ahead of you. No rush.`);
+        if(D.topG[0])f.push(`You're craving <strong>${D.topG[0][0]}</strong> — ${D.topG[0][1]} films of that genre waiting.`);
+        return f;
+    }
+
+    if(D.p10.length)f.push(`<strong>${D.p10.length}</strong> perfect 10${D.p10.length>1?'s':''}. ${slug==='favourites'?'Only the best for your favourites.':D.p10.length>=5?'You know greatness.':'Rare but unforgettable.'}`);
+    if(D.topDir[0])f.push(`${thematic?'Most featured':'Most watched'} director: <strong>${D.topDir[0].name}</strong> with ${D.topDir[0].count} films.${slug==='cronenberg'?' Obviously.':''}`);
+    if(D.topAct[0])f.push(`<strong>${D.topAct[0].name}</strong> ${thematic?'appears in '+D.topAct[0].count+' films in this collection':'— '+D.topAct[0].count+' appearances'}.`);
+    if(D.longest)f.push(`Longest entry: <strong>${D.longest.original_title}</strong> (${D.longest.runtime} min).${D.longest.runtime>180?' A true marathon.':''}`);
+    if(D.topDec)f.push(`${thematic?'Most represented decade':'Your sweet spot'}: the <strong>${D.topDec[0]}</strong> with ${D.topDec[1]} films.`);
+    if(parseFloat(D.avg)>=8)f.push(`Average <strong>${D.avg}</strong> — ${thematic?'a high-quality selection.':'only the finest.'}`);
+    else if(parseFloat(D.avg)>=6)f.push(`Average <strong>${D.avg}</strong> — ${thematic?'a diverse collection.':'balanced, you enjoy the good and the weird.'}`);
+    else f.push(`Average <strong>${D.avg}</strong> — fearless.`);
+    if(slug==='special_agent_dinozzos_watchlist')f.push(`<em>"You know, I saw this movie once..."</em> — Anthony DiNozzo`);
+    if(D.withSs.length)f.push(`<strong>${D.withSs.length}</strong> movies with screenshots — ${D.allSs.length} images captured.`);
+    return f;
+}
+
+function mkPosters(el,movies,showDate){
+    movies.forEach(m=>{const d=document.createElement('div');d.className='po';
+    let x=showDate&&m.added_date?`<div class="po-d">${fd(m.added_date)}</div>`:m['your-rating']?`<div class="po-r">${m['your-rating']}</div>`:'';
+    d.innerHTML=`<img src="${m.poster_path?'https://image.tmdb.org/t/p/w200'+m.poster_path:''}" loading="lazy">${x}<div class="po-t">${m.original_title}</div>`;
+    if(m.imdb_id)d.onclick=()=>window.open('https://www.imdb.com/title/'+m.imdb_id,'_blank');
+    el.appendChild(d);});
+}
+
+function mkPeople(el,people,label){
+    people.forEach(p=>{const d=document.createElement('div');d.className='pp';
+    const img=p.profile_path?`https://image.tmdb.org/t/p/w185${p.profile_path}`:'';
+    d.innerHTML=`<img src="${img}" loading="lazy"><div class="pp-n">${p.name}</div><div class="pp-c">${p.count} ${label}</div>`;
+    el.appendChild(d);});
+}
+
+
+const hs=(s)=>s.replace(/[_-]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+const seenL=mf.filter(e=>e.slug.startsWith('seen_')).sort((a,b)=>a.slug.localeCompare(b.slug));
+const otherL=mf.filter(e=>!['favourites','watchlist'].includes(e.slug)&&!e.slug.startsWith('seen_'));
+
+function deselectStats(){nav.querySelectorAll('.nav-button,.nav-dropdown-btn').forEach(b=>{b.classList.remove('selected','has-selected');b.style.backgroundColor='';b.style.color='';});nav.querySelectorAll('.nav-dropdown-item').forEach(i=>i.classList.remove('active'));nav.querySelectorAll('.nav-dropdown-menu').forEach(m=>m.classList.remove('open'));}
+function selectStats(el,color,ddBtn){deselectStats();if(el.classList.contains('nav-button')){el.classList.add('selected');el.style.backgroundColor=color;el.style.color='#fff';}if(el.classList.contains('nav-dropdown-item')&&ddBtn){el.classList.add('active');ddBtn.classList.add('has-selected');ddBtn.style.backgroundColor=color;ddBtn.style.color='#fff';}}
+
+// All Watched
+const wb=document.createElement('button');wb.className='nav-button nav-aw';wb.textContent='All Watched';
+wb.onclick=()=>{deselectStats();wb.classList.add('selected');showWatched();};
+nav.appendChild(wb);
+
+// Favourites
+const fe=mf.find(e=>e.slug==='favourites');
+if(fe){const b=document.createElement('button');b.className='nav-button';b.textContent='Favourites';b.onclick=()=>{selectStats(b,fe.color);showList(fe.slug,fe.color);};nav.appendChild(b);}
+
+// Watchlist
+const we=mf.find(e=>e.slug==='watchlist');
+if(we){const b=document.createElement('button');b.className='nav-button';b.textContent='Watchlist';b.onclick=()=>{selectStats(b,we.color);showList(we.slug,we.color);};nav.appendChild(b);}
+
+// Line break
+const brk=document.createElement('div');brk.className='nav-row-break';brk.style.cssText='width:100%;height:0';nav.appendChild(brk);
+
+// Watched dropdown
+if(seenL.length){const w=document.createElement('div');w.className='nav-dropdown-wrap';const db=document.createElement('button');db.className='nav-dropdown-btn';db.textContent='Watched ▾';db.onclick=(e)=>{e.stopPropagation();const m=w.querySelector('.nav-dropdown-menu');nav.querySelectorAll('.nav-dropdown-menu').forEach(x=>{if(x!==m)x.classList.remove('open');});m.classList.toggle('open');};w.appendChild(db);const m=document.createElement('div');m.className='nav-dropdown-menu';seenL.forEach(entry=>{const i=document.createElement('button');i.className='nav-dropdown-item';i.textContent=hs(entry.slug);i.onclick=()=>{selectStats(i,entry.color,db);db.textContent=hs(entry.slug)+' ▾';showList(entry.slug,entry.color);};m.appendChild(i);});w.appendChild(m);nav.appendChild(w);}
+
+// Collections dropdown
+if(otherL.length){const w=document.createElement('div');w.className='nav-dropdown-wrap';const db=document.createElement('button');db.className='nav-dropdown-btn';db.textContent='Collections ▾';db.onclick=(e)=>{e.stopPropagation();const m=w.querySelector('.nav-dropdown-menu');nav.querySelectorAll('.nav-dropdown-menu').forEach(x=>{if(x!==m)x.classList.remove('open');});m.classList.toggle('open');};w.appendChild(db);const m=document.createElement('div');m.className='nav-dropdown-menu';otherL.forEach(entry=>{const i=document.createElement('button');i.className='nav-dropdown-item';i.textContent=hs(entry.slug);i.onclick=()=>{selectStats(i,entry.color,db);db.textContent=hs(entry.slug)+' ▾';showList(entry.slug,entry.color);};m.appendChild(i);});w.appendChild(m);nav.appendChild(w);}
+
+document.addEventListener('click',()=>{nav.querySelectorAll('.nav-dropdown-menu').forEach(m=>m.classList.remove('open'));});
+
+// ========== SINGLE LIST ==========
+async function showList(slug,color){
+    cc();ct.innerHTML=`<div class="loading"><div class="sp"></div><br>Crunching numbers...</div>`;
+    const movies=await ld(slug);if(!movies.length){ct.innerHTML='<p class="empty">Empty list.</p>';return;}
+    const D=analyze(movies,slug);
+    const ff=facts(slug,movies,D);
+
+    let html=`
+    <div class="b"><div class="hero" style="background:linear-gradient(135deg,${color},${color}88)"><div class="hero-n" id="hn">0</div><div class="hero-l">${slug==='favourites'?'all-time favourites':slug==='watchlist'?'on the watchlist':isWatchedList(slug)?'movies watched':'in this collection'}</div><div class="hero-s">${heroTxt(slug,movies.length,D)}</div></div></div>
+    <div class="b"><div class="ig" id="ig"></div></div>
+    ${ff.length?`<div class="b">${ff.map(f=>`<div class="ph">${f}</div>`).join('')}</div>`:''}`;
+
+    if(D.topDir.length){html+=`<div class="b"><div class="st">${slug==='cronenberg'?'The Maestro':slug==='watchlist'?'Directors to Discover':isThematicList(slug)?'Featured Directors':'Most Watched Directors'}</div><div class="ppl" id="dirG"></div></div>`;}
+    if(D.topAct.length){html+=`<div class="b"><div class="st">${slug==='special_agent_dinozzos_watchlist'?'DiNozzo\'s Favourite Actors':slug==='watchlist'?'Actors Ahead':isThematicList(slug)?'Featured Actors':'Most Watched Actors'}</div><div class="ppl" id="actG"></div></div>`;}
+
+    html+=`<div class="b"><div class="st">Charts</div><div class="cg">
+        <div class="cc"><h3>Rating Distribution</h3><canvas id="c1"></canvas></div>
+        <div class="cc"><h3>Genres</h3><canvas id="c2"></canvas></div>
+        <div class="cc"><h3>By Decade</h3><canvas id="c3"></canvas></div>
+        <div class="cc"><h3>Countries</h3><canvas id="c4"></canvas></div>
+    </div></div>`;
+
+    html+=`<div class="b"><div class="st">${slug==='favourites'?'The Masterpieces':slug==='watchlist'?'Coming Soon':'Top Rated'}</div><div class="pg" id="topG"></div></div>`;
+
+    if(D.worst.length>=2&&slug!=='favourites'){html+=`<div class="b"><div class="st">Lowest Rated</div><div class="pg" id="worstG"></div></div>`;}
+
+
+    ct.innerHTML=html;
+
+    cnt(document.getElementById('hn'),movies.length);
+    const ig=document.getElementById('ig');
+    function mkIc(v,l,f){const d=document.createElement('div');d.className='ic';d.innerHTML=`<div class="ic-v">${v}</div><div class="ic-l">${l}</div>${f?'<div class="ic-f">'+f+'</div>':''}`;return d;}
+    ig.appendChild(mkIc(D.avg,'Avg Rating'));
+    ig.appendChild(rtCard(D.totalMins));
+    ig.appendChild(mkIc(D.topG[0]?D.topG[0][0]:'—','Top Genre',D.topG[0]?D.topG[0][1]+' films':''));
+    ig.appendChild(mkIc(D.topC[0]?D.topC[0][0]:'—','Top Country',D.topC[0]?D.topC[0][1]+' films':''));
+
+    if(D.topDir.length)mkPeople(document.getElementById('dirG'),D.topDir,'films');
+    if(D.topAct.length)mkPeople(document.getElementById('actG'),D.topAct,'films');
+
+    charts.push(new Chart(document.getElementById('c1'),{type:'bar',data:{labels:D.rB.map(b=>b[0]),datasets:[{data:D.rB.map(b=>b[1]),backgroundColor:color+'cc',borderRadius:6}]},options:co()}));
+    charts.push(new Chart(document.getElementById('c2'),{type:'doughnut',data:{labels:D.topG.slice(0,8).map(g=>g[0]),datasets:[{data:D.topG.slice(0,8).map(g=>g[1]),backgroundColor:P}]},options:don()}));
+    charts.push(new Chart(document.getElementById('c3'),{type:'bar',data:{labels:D.decs.map(d=>d[0]),datasets:[{data:D.decs.map(d=>d[1]),backgroundColor:color+'88',borderRadius:6}]},options:co()}));
+    charts.push(new Chart(document.getElementById('c4'),{type:'bar',data:{labels:D.topC.slice(0,8).map(c=>c[0]),datasets:[{data:D.topC.slice(0,8).map(c=>c[1]),backgroundColor:color+'aa',borderRadius:6}]},options:{...co(),indexAxis:'y'}}));
+
+    mkPosters(document.getElementById('topG'),D.topRated,false);
+    if(D.worst.length>=2&&slug!=='favourites')mkPosters(document.getElementById('worstG'),D.worst,false);
+    anim();
+}
+
+// ========== ALL WATCHED ==========
+async function showWatched(){
+    cc();ct.innerHTML=`<div class="loading"><div class="sp"></div><br>Loading your entire movie journey...</div>`;
+    const slugs=mf.filter(e=>e.slug.startsWith('seen_')).map(e=>e.slug);
+    let all=[];for(const s of slugs)all=all.concat(await ld(s));
+    const seen=new Set();all=all.filter(m=>{if(seen.has(m.id))return false;seen.add(m.id);return true;});
+    if(!all.length){ct.innerHTML='<p class="empty">No watched movies.</p>';return;}
+
+    const D=analyze(all,'watched');
+
+    const perYear={};all.forEach(m=>{if(m.added_date){const y=m.added_date.substring(0,4);perYear[y]=(perYear[y]||0)+1;}});
+    const years=Object.entries(perYear).sort((a,b)=>a[0].localeCompare(b[0]));
+    const perMonth={};all.forEach(m=>{if(m.added_date){const ym=m.added_date.substring(0,7);perMonth[ym]=(perMonth[ym]||0)+1;}});
+    const months=Object.entries(perMonth).sort((a,b)=>a[0].localeCompare(b[0]));
+    let cum=0;const cumD=months.map(([l,c])=>{cum+=c;return{x:l,y:cum};});
+    const bestYear=years.length?years.reduce((b,y)=>y[1]>b[1]?y:b,['—',0]):['—',0];
+    const recent=all.filter(m=>m.added_date).sort((a,b)=>b.added_date.localeCompare(a.added_date)).slice(0,12);
+    const d=(D.totalMins/60/24).toFixed(1);const mo=(D.totalMins/60/24/30).toFixed(1);
+
+    const ff=[];
+    if(bestYear[0]!=='—')ff.push(`Your most active year: <strong>${bestYear[0]}</strong> with <strong>${bestYear[1]}</strong> movies.`);
+    ff.push(`<strong>${d} days</strong> of runtime. That's <strong>${mo} months</strong> of pure cinema.`);
+    if(D.p10.length)ff.push(`<strong>${D.p10.length}</strong> perfect 10s. ${D.p10.length>=10?'You have an extraordinary eye for greatness.':'Each one etched in memory.'}`);
+    if(D.topDir[0])ff.push(`<strong>${D.topDir[0].name}</strong> directed ${D.topDir[0].count} of your watched films. Your go-to auteur.`);
+    if(D.topAct[0])ff.push(`<strong>${D.topAct[0].name}</strong> appeared in ${D.topAct[0].count} movies. Basically a constant in your life.`);
+    if(D.allSs.length)ff.push(`You captured <strong>${D.allSs.length}</strong> screenshots across <strong>${D.withSs.length}</strong> films. Those moments mattered.`);
+
+    const acc='#ff9500';
+    let html=`
+    <div class="b"><div class="hero" style="background:linear-gradient(135deg,#ff9500,#ff6482)"><div class="hero-n" id="hn">0</div><div class="hero-l">movies watched. Ever.</div><div class="hero-s">${all.length} movies, ${years.length} years. Here's your journey.</div></div></div>
+    <div class="b"><div class="ig" id="ig"></div></div>
+    <div class="b">${ff.map(f=>`<div class="ph">${f}</div>`).join('')}</div>
+    <div class="b"><div class="st">Movies Per Year</div><div class="cg"><div class="cc w t"><canvas id="cY"></canvas></div></div></div>
+    <div class="b"><div class="st">Your Journey</div><div class="cg">
+        <div class="cc"><h3>Cumulative Total</h3><canvas id="cC"></canvas></div>
+        <div class="cc"><h3>Monthly Activity</h3><canvas id="cM"></canvas></div>
+    </div></div>
+    <div class="b"><div class="st">Most Watched Directors</div><div class="ppl" id="dirG"></div></div>
+    <div class="b"><div class="st">Most Watched Actors</div><div class="ppl" id="actG"></div></div>
+    <div class="b"><div class="st">Ratings & Genres</div><div class="cg">
+        <div class="cc"><h3>Rating Distribution</h3><canvas id="cR"></canvas></div>
+        <div class="cc"><h3>Top Genres</h3><canvas id="cG"></canvas></div>
+    </div></div>
+    <div class="b"><div class="st">Countries</div><div class="cg"><div class="cc w"><h3>Where your movies come from</h3><canvas id="cCo"></canvas></div></div></div>
+    <div class="b"><div class="st">Top Rated — All Time</div><div class="pg" id="topG"></div></div>
+    <div class="b"><div class="st">Recently Watched</div><div class="pg" id="recG"></div></div>`;
+    ct.innerHTML=html;
+
+    cnt(document.getElementById('hn'),all.length);
+    const ig=document.getElementById('ig');
+    function mkIc2(v,l,f){const d=document.createElement('div');d.className='ic';d.innerHTML=`<div class="ic-v">${v}</div><div class="ic-l">${l}</div>${f?'<div class="ic-f">'+f+'</div>':''}`;return d;}
+    ig.appendChild(mkIc2(D.avg,'Avg Rating',parseFloat(D.avg)>=7?'High standards.':'Eclectic taste.'));
+    ig.appendChild(rtCard(D.totalMins));
+    ig.appendChild(mkIc2(bestYear[0],'Best Year',bestYear[1]+' movies'));
+    ig.appendChild(mkIc2(D.topG[0]?D.topG[0][0]:'—','Fav Genre',D.topG[0]?D.topG[0][1]+' films':''));
+
+    mkPeople(document.getElementById('dirG'),D.topDir,'films');
+    mkPeople(document.getElementById('actG'),D.topAct,'films');
+
+    const yC=years.map(([y])=>({2024:'#5ac8fa',2025:'#007aff',2026:'#ff6482'}[y]||'#8e8e93'));
+    charts.push(new Chart(document.getElementById('cY'),{type:'bar',data:{labels:years.map(y=>y[0]),datasets:[{data:years.map(y=>y[1]),backgroundColor:yC,borderRadius:8}]},options:co()}));
+    charts.push(new Chart(document.getElementById('cC'),{type:'line',data:{labels:cumD.map(d=>d.x),datasets:[{data:cumD.map(d=>d.y),borderColor:acc,backgroundColor:acc+'22',fill:true,tension:.3,pointRadius:0}]},options:{...co(),scales:{y:{ticks:{color:tc()},grid:{color:gc()}},x:{ticks:{color:tc(),maxTicksLimit:10},grid:{display:false}}}}}));
+    charts.push(new Chart(document.getElementById('cM'),{type:'bar',data:{labels:months.map(m=>m[0]),datasets:[{data:months.map(m=>m[1]),backgroundColor:acc+'88',borderRadius:3}]},options:{...co(),scales:{y:{ticks:{color:tc()},grid:{color:gc()}},x:{ticks:{color:tc(),maxTicksLimit:12},grid:{display:false}}}}}));
+    charts.push(new Chart(document.getElementById('cR'),{type:'bar',data:{labels:D.rB.map(b=>b[0]),datasets:[{data:D.rB.map(b=>b[1]),backgroundColor:acc+'cc',borderRadius:6}]},options:co()}));
+    charts.push(new Chart(document.getElementById('cG'),{type:'doughnut',data:{labels:D.topG.slice(0,10).map(g=>g[0]),datasets:[{data:D.topG.slice(0,10).map(g=>g[1]),backgroundColor:P}]},options:don()}));
+    charts.push(new Chart(document.getElementById('cCo'),{type:'bar',data:{labels:D.topC.slice(0,10).map(c=>c[0]),datasets:[{data:D.topC.slice(0,10).map(c=>c[1]),backgroundColor:acc+'aa',borderRadius:6}]},options:{...co(),indexAxis:'y'}}));
+
+    mkPosters(document.getElementById('topG'),D.topRated,false);
+    mkPosters(document.getElementById('recG'),recent,true);
+    anim();
+}
+});
+</script>
+</body>
+</html>

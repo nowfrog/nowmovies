@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nowfrog Movie Lists</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/nowmovies/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/nowmovies/favicon.svg" />
+    <link rel="shortcut icon" href="/nowmovies/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/nowmovies/apple-touch-icon.png" />
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="NowMovies" />
+    <link rel="manifest" href="/nowmovies/site.webmanifest" />
+</head>
+<body>
+
+    <header class="app-header">
+        <h1 id="app-title">Nowfrog Movie Lists</h1>
+        <div class="header-actions">
+            <a href="/nowmovies/stats.html" class="hi" title="Stats"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h2v-8H5v8zm6 0h2V4h-2v16zm6 0h2v-12h-2v12z"/></svg></a>
+            <button id="dark-mode-toggle" class="hi" aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button>
+            <div class="admin-lock-wrapper">
+                <button id="admin-toggle" class="hi" aria-label="Admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></button>
+                <!-- Login popup -->
+                <div id="admin-popup" class="admin-popup hidden">
+                    <div id="admin-popup-login">
+                        <input type="password" id="admin-password" placeholder="Password..." class="admin-popup-input">
+                        <button id="admin-login-btn" type="button" class="admin-popup-btn">Login</button>
+                    </div>
+                    <div id="admin-popup-logout" class="hidden">
+                        <button id="admin-logout-btn" type="button" class="admin-popup-btn admin-popup-btn-red">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Manage Lists button (visible only when logged in) -->
+    <div id="admin-manage-bar" class="admin-manage-bar hidden">
+        <button id="admin-manage-toggle" class="admin-manage-toggle-btn">Manage Lists</button>
+    </div>
+
+    <!-- Admin Panel (toggled by Manage Lists button) -->
+    <div id="admin-panel" class="admin-panel hidden">
+        <div class="admin-container">
+            <form id="adminForm">
+                <label for="admin-list-select">List:</label>
+                <select id="admin-list-select" required>
+                    <option value="" disabled selected>Select...</option>
+                </select>
+
+                <div id="admin-new-list-fields" class="hidden">
+                    <label for="admin-new-list-name">New list name:</label>
+                    <input type="text" id="admin-new-list-name" placeholder="e.g. Movies of 2025">
+                    <label for="admin-new-list-color">List color:</label>
+                    <input type="color" id="admin-new-list-color" value="#007aff" style="width:100%;height:35px;border:none;cursor:pointer;">
+                </div>
+
+                <label for="admin-description">List description:</label>
+                <textarea id="admin-description" rows="2" placeholder="List description..."></textarea>
+                <button type="button" id="admin-save-description-btn" class="admin-secondary-btn">Save Description</button>
+
+                <label for="admin-action">Action:</label>
+                <select id="admin-action" required>
+                    <option value="" disabled selected>Select...</option>
+                    <option value="create">Create empty list</option>
+                    <option value="add">Add/Update movie</option>
+                    <option value="remove">Remove movie from list</option>
+                    <option value="manage_screenshots">Manage Screenshots</option>
+                    <option value="delete">Delete entire list</option>
+                </select>
+
+                <div id="admin-movie-select-fields" class="hidden">
+                    <label for="admin-movie-select">Select movie to remove:</label>
+                    <select id="admin-movie-select">
+                        <option value="" disabled selected>Loading movies...</option>
+                    </select>
+                </div>
+
+                <!-- Screenshot movie picker (for manage_screenshots action) -->
+                <div id="admin-screenshot-movie-fields" class="hidden">
+                    <label for="admin-screenshot-movie-select">Select movie:</label>
+                    <select id="admin-screenshot-movie-select">
+                        <option value="" disabled selected>Loading...</option>
+                    </select>
+                </div>
+
+                <div id="admin-search-fields" class="hidden">
+                    <label for="admin-search-input">Search movie by title:</label>
+                    <input type="text" id="admin-search-input" placeholder="e.g. Matrix, Inception...">
+                    <div id="admin-search-spinner" class="admin-search-spinner hidden">Searching...</div>
+                    <div id="admin-search-results" class="admin-search-results hidden"></div>
+                    <small class="admin-hint">Or manually enter the IMDb link below.</small>
+                </div>
+
+                <div id="admin-imdb-fields" class="hidden">
+                    <label for="admin-imdb-url">IMDb link or ID:</label>
+                    <input type="text" id="admin-imdb-url" placeholder="https://www.imdb.com/title/tt1234567">
+                </div>
+
+                <div id="admin-rating-fields" class="hidden">
+                    <label for="admin-rating">Personal rating (optional):</label>
+                    <input type="text" id="admin-rating" placeholder="7/10">
+                    <label for="admin-screenshots">Add Screenshots:</label>
+                    <input type="file" id="admin-screenshots" multiple accept="image/*">
+                    <small class="admin-hint">You can select multiple files.</small>
+                </div>
+
+                <button type="submit" id="admin-submit-btn" class="hidden">Submit</button>
+            </form>
+
+            <div id="admin-response" class="admin-response hidden"></div>
+
+            <div id="admin-screenshot-manager" class="hidden">
+                <h3>Saved Screenshots</h3>
+                <p id="admin-movie-title-ref" class="admin-hint"></p>
+                <div id="admin-screenshots-grid" class="screenshots-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <nav id="movie-lists-nav" class="navigation-bar"></nav>
+
+    <p id="list-description" class="list-description hidden"></p>
+
+    <main id="main-content">
+        <div id="filter-controls" class="filter-container hidden">
+            <input type="search" id="search-bar" class="search-input" placeholder="Search movies...">
+            <select id="sort-select" class="sort-select">
+                <option value="" disabled selected>Sort by...</option>
+                <option value="title-asc">Title (A-Z)</option>
+                <option value="title-desc">Title (Z-A)</option>
+                <option value="rating-desc">Rating (High > Low)</option>
+                <option value="rating-asc">Rating (Low > High)</option>
+                <option value="runtime-desc">Runtime (Long > Short)</option>
+                <option value="runtime-asc">Runtime (Short > Long)</option>
+                <option value="release-date-desc">Year (New > Old)</option>
+                <option value="release-date-asc">Year (Old > New)</option>
+                <option value="added-desc">Added (Recent > Old)</option>
+                <option value="added-asc">Added (Old > Recent)</option>
+            </select>
+             <button id="view-toggle-button" class="view-toggle-button" aria-label="Toggle View Mode">Grid</button>
+        </div>
+
+        <div id="welcome-message" class="welcome-message">
+             <p>A window into my life through cinema. Every film watched, rated, and remembered. Browse my lists, explore the stats, and see the world through the movies I love.</p>
+        </div>
+
+        <div id="loading-indicator" class="loading-indicator hidden">Loading...</div>
+        <div id="error-message" class="error-message hidden"></div>
+
+        <div id="movies-container" class="movies-grid view-mode--cards"></div>
+    </main>
+
+    <div id="movie-modal" class="modal hidden">
+        <div class="modal-overlay" id="modal-overlay"></div>
+        <div class="modal-content">
+            <button id="modal-close-button" class="modal-close-button" aria-label="Close modal">&times;</button>
+            <img id="modal-poster" src="" alt="Movie Poster" class="modal-poster"/>
+            <h2 id="modal-title" class="modal-title"></h2>
+            <p id="modal-meta" class="modal-meta"></p>
+            <div id="modal-tags" class="modal-tags"></div>
+            <p id="modal-overview" class="modal-overview"></p>
+            <div class="modal-footer">
+                 <div class="modal-footer-left">
+                     <a id="modal-imdb-button" href="#" target="_blank" rel="noopener noreferrer" class="imdb-button modal-imdb-button">IMDb</a>
+                     <span id="modal-rating" class="movie-card__rating modal-rating"><span class="modal-rating-value"></span><span class="modal-score-label">my score</span></span>
+                 </div>
+                 <div class="modal-footer-right">
+                     <button id="modal-download-btn" class="modal-action-btn" title="Download poster"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 12v1.5a.5.5 0 00.5.5h11a.5.5 0 00.5-.5V12"/></svg></button>
+                     <button id="modal-share-btn" class="modal-action-btn" title="Share"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V2m0 0L5 5m3-3l3 3"/><path d="M3 8v5.5a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V8"/></svg></button>
+                     <button id="modal-watchlist-btn" class="modal-action-btn hidden" title="Move to list"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.5"/><path d="M1 8h2m10 0h2"/></svg></button>
+                     <button id="modal-remove-btn" class="modal-action-btn modal-action-btn-danger hidden" title="Remove from list"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h12M5.5 4V2.5h5V4M6 7v5m4-5v5"/><path d="M3 4l.8 9.5a1 1 0 001 .5h6.4a1 1 0 001-.5L13 4"/></svg></button>
+                 </div>
+            </div>
+            <!-- Watchlist move popup -->
+            <div id="modal-move-popup" class="modal-move-popup hidden">
+                <p class="modal-move-title">Move to list:</p>
+                <div id="modal-move-list" class="modal-move-list"></div>
+                <button id="modal-move-cancel" class="modal-move-cancel">Cancel</button>
+            </div>
+            <div id="modal-cast" class="modal-cast hidden"></div>
+            <div id="modal-screenshots" class="modal-screenshots hidden"></div>
+        </div>
+    </div>
+
+    <div id="lightbox" class="lightbox">
+        <button id="lightbox-close" class="lightbox-close">&times;</button>
+        <img id="lightbox-img" class="lightbox-content" src="" alt="Zoom">
+    </div>
+
+    <button id="scroll-top" class="scroll-top-button" aria-label="Scroll to top">↑</button>
+    <script src="scripts.js"></script>
+    <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
+</body>
+</html>
